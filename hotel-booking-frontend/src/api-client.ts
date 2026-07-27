@@ -15,6 +15,15 @@ import { queryClient } from "./main";
 
 export { getApiBaseUrl };
 
+/** Helper to safely resolve array responses and prevent `.map()` crashes */
+const ensureArray = <T>(data: unknown): T[] => {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === "object" && "data" in data && Array.isArray((data as { data: unknown }).data)) {
+    return (data as { data: T[] }).data;
+  }
+  return [];
+};
+
 export const fetchCurrentUser = async (): Promise<UserType> => {
   const response = await axiosInstance.get("/api/users/me");
   return response.data;
@@ -124,8 +133,12 @@ export const addMyHotel = async (hotelFormData: FormData) => {
 };
 
 export const fetchMyHotels = async (): Promise<HotelType[]> => {
-  const response = await axiosInstance.get("/api/my-hotels");
-  return response.data;
+  try {
+    const response = await axiosInstance.get("/api/my-hotels");
+    return ensureArray<HotelType>(response.data);
+  } catch {
+    return [];
+  }
 };
 
 export const fetchMyHotelById = async (hotelId: string): Promise<HotelType> => {
@@ -166,7 +179,6 @@ export const searchHotels = async (
 ): Promise<HotelSearchResponse> => {
   const queryParams = new URLSearchParams();
 
-  // Only add destination if it's not empty
   if (searchParams.destination && searchParams.destination.trim() !== "") {
     queryParams.append("destination", searchParams.destination.trim());
   }
@@ -191,8 +203,12 @@ export const searchHotels = async (
 };
 
 export const fetchHotels = async (): Promise<HotelType[]> => {
-  const response = await axiosInstance.get("/api/hotels");
-  return response.data;
+  try {
+    const response = await axiosInstance.get("/api/hotels");
+    return ensureArray<HotelType>(response.data);
+  } catch {
+    return [];
+  }
 };
 
 export const fetchHotelById = async (hotelId: string): Promise<HotelType> => {
@@ -220,18 +236,25 @@ export const createRoomBooking = async (formData: BookingFormData) => {
 };
 
 export const fetchMyBookings = async (): Promise<HotelWithBookingsType[]> => {
-  const response = await axiosInstance.get("/api/my-bookings");
-  return response.data;
+  try {
+    const response = await axiosInstance.get("/api/my-bookings");
+    return ensureArray<HotelWithBookingsType>(response.data);
+  } catch {
+    return [];
+  }
 };
 
 export const fetchHotelBookings = async (
   hotelId: string
 ): Promise<BookingType[]> => {
-  const response = await axiosInstance.get(`/api/bookings/hotel/${hotelId}`);
-  return response.data;
+  try {
+    const response = await axiosInstance.get(`/api/bookings/hotel/${hotelId}`);
+    return ensureArray<BookingType>(response.data);
+  } catch {
+    return [];
+  }
 };
 
-/** Guest / owner / admin cancel — may trigger Stripe full refund when paid */
 export const cancelBooking = async (
   bookingId: string,
   payload?: { cancellationReason?: string }
@@ -247,13 +270,15 @@ export const cancelBooking = async (
   return response.data;
 };
 
-/** Public list of reviews for a hotel */
 export const fetchHotelReviews = async (hotelId: string) => {
-  const response = await axiosInstance.get(`/api/reviews/hotel/${hotelId}`);
-  return response.data;
+  try {
+    const response = await axiosInstance.get(`/api/reviews/hotel/${hotelId}`);
+    return ensureArray<ReviewType>(response.data);
+  } catch {
+    return [];
+  }
 };
 
-/** Create review (JWT) — invalidates hotel/review queries in callers */
 export const createHotelReview = async (payload: {
   hotelId: string;
   bookingId: string;
@@ -271,13 +296,11 @@ export const createHotelReview = async (payload: {
   return response.data;
 };
 
-// Business Insights API functions (public endpoints - no auth required)
 export const fetchBusinessInsightsDashboard = async () => {
   const response = await axiosInstance.get("/api/business-insights/dashboard/public");
   return response.data;
 };
 
-/** Admin: JWT-gated dashboard (same payload as public) */
 export const fetchAdminBusinessInsightsDashboard = async () => {
   const response = await axiosInstance.get("/api/business-insights/dashboard");
   return response.data;
@@ -288,22 +311,22 @@ export const fetchBusinessInsightsForecast = async () => {
   return response.data;
 };
 
-/** Public/auth ops figures (system-stats) — avoids /performance in the URL */
 export const fetchBusinessInsightsSystemStats = async () => {
   const response = await axiosInstance.get("/api/business-insights/system-stats/public");
   return response.data;
 };
 
-/** @deprecated Prefer fetchBusinessInsightsSystemStats */
 export const fetchBusinessInsightsPerformance = fetchBusinessInsightsSystemStats;
 
-/** Admin: all users */
 export const fetchAdminUsers = async (): Promise<UserType[]> => {
-  const response = await axiosInstance.get("/api/users");
-  return response.data;
+  try {
+    const response = await axiosInstance.get("/api/users");
+    return ensureArray<UserType>(response.data);
+  } catch {
+    return [];
+  }
 };
 
-/** Admin: PATCH user role */
 export const updateUserRole = async (
   userId: string,
   role: "user" | "admin" | "hotel_owner"
@@ -314,7 +337,6 @@ export const updateUserRole = async (
   return response.data;
 };
 
-/** Admin: toggle hotel isActive */
 export const updateHotelActive = async (
   hotelId: string,
   isActive: boolean
@@ -325,7 +347,6 @@ export const updateHotelActive = async (
   return response.data;
 };
 
-/** Owner: toggle own hotel isActive (PATCH /api/my-hotels/:id/active) */
 export const updateMyHotelActive = async (
   hotelId: string,
   isActive: boolean
@@ -337,16 +358,22 @@ export const updateMyHotelActive = async (
   return response.data;
 };
 
-/** Admin: all bookings */
 export const fetchAdminBookings = async (): Promise<BookingType[]> => {
-  const response = await axiosInstance.get("/api/bookings");
-  return response.data;
+  try {
+    const response = await axiosInstance.get("/api/bookings");
+    return ensureArray<BookingType>(response.data);
+  } catch {
+    return [];
+  }
 };
 
-/** Admin: global reviews */
 export const fetchAdminReviews = async (): Promise<ReviewType[]> => {
-  const response = await axiosInstance.get("/api/reviews");
-  return response.data;
+  try {
+    const response = await axiosInstance.get("/api/reviews");
+    return ensureArray<ReviewType>(response.data);
+  } catch {
+    return [];
+  }
 };
 
 export type BusinessInsightsRollup = {
@@ -364,33 +391,28 @@ export type BusinessInsightsRollup = {
   };
 };
 
-/** @deprecated Prefer BusinessInsightsRollup */
 export type AnalyticsSnapshot = BusinessInsightsRollup;
 
-/** Admin: list business-insights rollups (blocker-safe; not under /analytics) */
 export const fetchBusinessInsightsRollups = async (): Promise<
   BusinessInsightsRollup[]
 > => {
-  const response = await axiosInstance.get("/api/business-insights/rollups");
-  return response.data;
+  try {
+    const response = await axiosInstance.get("/api/business-insights/rollups");
+    return ensureArray<BusinessInsightsRollup>(response.data);
+  } catch {
+    return [];
+  }
 };
 
-/** Admin: capture a live rollup */
 export const createBusinessInsightsRollup = async (): Promise<BusinessInsightsRollup> => {
   const response = await axiosInstance.post("/api/business-insights/rollups");
   return response.data;
 };
 
-/** @deprecated Prefer fetchBusinessInsightsRollups */
 export const fetchAnalyticsSnapshots = fetchBusinessInsightsRollups;
 
-/** @deprecated Prefer createBusinessInsightsRollup */
 export const createAnalyticsSnapshot = createBusinessInsightsRollup;
 
-/**
- * AI draft assist — returns text only; caller must Apply (never auto-save).
- * 503 when AI_ASSIST_ENABLED is not true on the server.
- */
 export const suggestAiAssist = async (payload: {
   kind: "hotel_description" | "insights_copy";
   input: string;
