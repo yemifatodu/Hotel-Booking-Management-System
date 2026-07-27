@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useContext } from "react";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useQuery } from "react-query";
 import * as apiClient from "../api-client";
@@ -108,4 +109,12 @@ export const AppContextProvider = ({
       {children}
     </AppContext.Provider>
   );
+};
+
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error("useAppContext must be used within an AppContextProvider");
+  }
+  return context;
 };
