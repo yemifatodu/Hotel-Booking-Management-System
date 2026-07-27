@@ -1,28 +1,27 @@
 import Footer from "../components/Footer";
 import Header from "../components/Header";
-import PageContainer from "../components/PageContainer";
-import { useLocation } from "react-router-dom";
+import Hero from "../components/Hero";
 
-interface Props {
+type Props = {
   children: React.ReactNode;
-}
+  showHero?: boolean;
+};
 
-/**
- * App shell. Header/Footer static. Home stagger lives in Hero + Home only
- * (never wrap the hero blue bg in StaggerItem).
- */
-const Layout = ({ children }: Props) => {
-  const location = useLocation();
-  const isHomePage = location.pathname === "/";
-
+const Layout = ({ children, showHero = true }: Props) => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      {/* Sticky or static Header */}
       <Header />
-      {isHomePage ? (
-        <div className="flex-1">{children}</div>
-      ) : (
-        <PageContainer className="py-8 flex-1">{children}</PageContainer>
-      )}
+
+      {/* Optional Hero Banner */}
+      {showHero && <Hero />}
+
+      {/* Main Content Area */}
+      <div className="container mx-auto px-4 flex-1 py-10">
+        {children}
+      </div>
+
+      {/* Comprehensive Footer */}
       <Footer />
     </div>
   );
