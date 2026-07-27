@@ -8,19 +8,16 @@ const Header = () => {
   return (
     <header className="bg-slate-900 border-b border-teal-500/20 py-4 shadow-lg">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        {/* Brand Logo / Name */}
         <Link to="/" className="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
-          <span className="text-teal-400">Huuboi</span>
-          <span className="text-sm font-normal text-gray-400 hidden sm:inline">| Hotel Bookings</span>
+          <span className="text-teal-400">HolidayHotel</span>
         </Link>
 
-        {/* Navigation & Contact Email */}
         <div className="flex items-center space-x-6">
           <a 
             href="mailto:info@yemifatodu.online" 
             className="text-xs sm:text-sm text-gray-300 hover:text-teal-400 transition-colors hidden md:inline-block"
           >
-            ✉️ info@yemifatodu.online
+            info@yemifatodu.online
           </a>
 
           {isLoggedIn ? (

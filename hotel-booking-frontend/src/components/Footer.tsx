@@ -6,10 +6,10 @@ const Footer = () => {
       <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
           <span className="text-2xl font-bold tracking-tight text-teal-400">
-            Huuboi
+            HolidayHotel
           </span>
           <p className="text-xs text-gray-400 mt-1">
-            Global travel booking platform & AI itinerary planning.
+            Seamless hotel reservations and booking management.
           </p>
         </div>
 
