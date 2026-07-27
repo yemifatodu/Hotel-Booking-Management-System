@@ -1,42 +1,48 @@
-import { useNavigate } from "react-router-dom";
-import useSearchContext from "../hooks/useSearchContext";
-import MobileNav from "./MobileNav";
-import MainNav from "./MainNav";
-import PageContainer from "./PageContainer";
-import { Building2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useAppContext } from "../contexts/AppContext";
+import SignOutButton from "./SignOutButton";
 
 const Header = () => {
-  const search = useSearchContext();
-  const navigate = useNavigate();
-
-  const handleLogoClick = () => {
-    search.clearSearchValues();
-    navigate("/");
-  };
+  const { isLoggedIn } = useAppContext();
 
   return (
-    <header className="bg-gradient-to-r from-primary-600 to-primary-700 shadow-large sticky top-0 z-50 h-[72px] flex items-center shrink-0">
-      <PageContainer>
-        <div className="flex justify-between items-center h-full">
-          <button
-            onClick={handleLogoClick}
-            className="flex items-center space-x-2 group"
+    <header className="bg-slate-900 border-b border-teal-500/20 py-4 shadow-lg">
+      <div className="container mx-auto px-4 flex justify-between items-center">
+        {/* Brand Logo / Name */}
+        <Link to="/" className="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
+          <span className="text-teal-400">Huuboi</span>
+          <span className="text-sm font-normal text-gray-400 hidden sm:inline">| Hotel Bookings</span>
+        </Link>
+
+        {/* Navigation & Contact Email */}
+        <div className="flex items-center space-x-6">
+          <a 
+            href="mailto:info@yemifatodu.online" 
+            className="text-xs sm:text-sm text-gray-300 hover:text-teal-400 transition-colors hidden md:inline-block"
           >
-            <div className="bg-white p-2 rounded-xl shadow-soft group-hover:shadow-medium transition-all duration-300">
-              <Building2 className="w-6 h-6 text-primary-600" />
+            ✉️ info@yemifatodu.online
+          </a>
+
+          {isLoggedIn ? (
+            <div className="flex items-center space-x-4">
+              <Link to="/my-bookings" className="text-gray-200 hover:text-teal-400 font-medium transition-colors">
+                My Bookings
+              </Link>
+              <Link to="/my-hotels" className="text-gray-200 hover:text-teal-400 font-medium transition-colors">
+                My Hotels
+              </Link>
+              <SignOutButton />
             </div>
-            <span className="text-lg md:text-2xl font-medium text-white tracking-tight group-hover:text-primary-100 transition-colors">
-              HolidayHotel
-            </span>
-          </button>
-          <div className="md:hidden">
-            <MobileNav />
-          </div>
-          <div className="hidden md:flex items-center">
-            <MainNav />
-          </div>
+          ) : (
+            <Link
+              to="/sign-in"
+              className="bg-teal-500 hover:bg-teal-600 text-slate-950 font-semibold px-5 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-teal-500/20"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
-      </PageContainer>
+      </div>
     </header>
   );
 };
