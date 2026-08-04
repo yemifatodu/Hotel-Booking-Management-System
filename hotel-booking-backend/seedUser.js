@@ -2,7 +2,22 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
-const User = require("./src/models/user");
+// Safely load the User model (handles both ts-node and compiled dist/src builds)
+let User;
+try {
+  User = require("./src/models/user").default || require("./src/models/user");
+} catch (e) {
+  try {
+    User = require("./models/user").default || require("./models/user");
+  } catch (err) {
+    try {
+      User = require("./dist/models/user").default || require("./dist/models/user");
+    } catch (finalErr) {
+      console.error("Could not locate the User model file. Please check your models directory path.");
+      process.exit(1);
+    }
+  }
+}
 
 async function seedUser() {
   try {
@@ -14,30 +29,38 @@ async function seedUser() {
 
     await mongoose.connect(connString);
     
-    const hashedPassword = await bcrypt.hash("YourSecurePassword123!", 10);
+    // Hash password '12345678' to match the project README
+    const hashedPassword = await bcrypt.hash("12345678", 10);
     
-    // Target test@user.com
-    let user = await User.findOne({ email: "test@user.com" });
-    if (user) {
-      user.password = hashedPassword;
-      user.role = "admin";
-      await user.save();
-      console.log("Updated test@user.com password successfully!");
-    } else {
-      user = new User({
-        email: "test@user.com",
-        password: hashedPassword,
-        firstName: "Test",
-        lastName: "Admin",
-        role: "admin"
-      });
-      await user.save();
-      console.log("Created test@user.com successfully!");
+    const testAccounts = [
+      { email: "test@user.com", firstName: "Test", lastName: "Admin", role: "admin" },
+      { email: "owner@hotel.com", firstName: "Hotel", lastName: "Owner", role: "admin" },
+      { email: "guest@user.com", firstName: "Test", lastName: "Guest", role: "user" },
+    ];
+
+    for (const acc of testAccounts) {
+      let user = await User.findOne({ email: acc.email });
+      if (user) {
+        user.password = hashedPassword;
+        user.role = acc.role;
+        await user.save();
+        console.log(`Updated ${acc.email} successfully!`);
+      } else {
+        user = new User({
+          email: acc.email,
+          password: hashedPassword,
+          firstName: acc.firstName,
+          lastName: acc.lastName,
+          role: acc.role
+        });
+        await user.save();
+        console.log(`Created ${acc.email} successfully!`);
+      }
     }
   } catch (error) {
-    console.error("Error seeding user:", error);
+    console.error("Error seeding users:", error);
   } finally {
-    mongoose.connection.close();
+    await mongoose.connection.close();
   }
 }
 
