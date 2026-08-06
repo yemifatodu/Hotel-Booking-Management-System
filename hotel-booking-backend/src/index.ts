@@ -75,7 +75,11 @@ const connectDB = async () => {
         : {}),
     });
     console.log("✅ MongoDB connected successfully");
-    console.log(`📦 Database: ${mongoose.connection.db.databaseName}`);
+    if (mongoose.connection.db) {
+      console.log(`📦 Database: ${mongoose.connection.db.databaseName}`);
+    } else {
+      console.log(`📦 Database: ${mongoose.connection.name || 'connected'}`);
+    }
     if (wantsTls) {
       console.log("🔒 MongoDB TLS enabled");
     }
